@@ -321,7 +321,7 @@ func methodTest() {
 	x = 1
 	fmt.Println(x)
 
-	x = "TOM"
+	x = "TIM"
 	fmt.Println(x)
 }
 
