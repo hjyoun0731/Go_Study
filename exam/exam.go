@@ -6,6 +6,8 @@ import (
 	"log"
 	"math"
 	"os"
+	"sync"
+	"time"
 )
 
 var a = 11
@@ -50,109 +52,6 @@ type RectIntertest struct {
 // CircleIntertest for shape interface
 type CircleIntertest struct {
 	radius float64
-}
-
-func main() {
-
-	// 	rawLiteral := `아리랑\n아리랑\n아라리요`
-	// 	interLiteral := "아리랑 아리랑\n아라리요"
-
-	// 	say(rawLiteral)
-	// 	say(interLiteral)
-
-	// 	sayHello := "hello"
-	// 	say2(&sayHello)
-	// 	say2(&sayHello)
-
-	// 	say3("this", "is", "a", "book")
-	// 	say3("hi")
-
-	// 	fmt.Printf("%d %d %d %d %d %d %d %d %d %s %s %s %s", a, int(f), i, j, k, c, Apple, Grape, Orange, s, Visa, Master, Amex)
-
-	// 	if a == 1 {
-	// 		fmt.Println("a is 1")
-	// 	} else if a == 2 {
-	// 		fmt.Println("a is 2")
-	// 	} else {
-	// 		fmt.Println("a is not 1 or 2")
-	// 	}
-
-	// 	if val := i * 2; i < k {
-	// 		fmt.Println(val)
-	// 	}
-
-	// 	switch val := 1; val {
-	// 	case 1:
-	// 		fmt.Println("val is 1")
-	// 	case 2:
-	// 		fmt.Println("val is 2")
-	// 	case 3:
-	// 		fmt.Println("val is 3")
-	// 	default:
-	// 		fmt.Println("val is not 123")
-	// 	}
-
-	// 	switch val2 := 0; {
-	// 	case val2 == 0:
-	// 		fmt.Println("val is 0")
-	// 	case val2 == 1:
-	// 		fmt.Println("val is 1")
-	// 	case val2 == 2:
-	// 		fmt.Println("val is 2")
-	// 	}
-
-	// 	var i interface{} //???? what is interface{}
-	// 	switch i.(type) {
-	// 	case int:
-	// 		println("int")
-	// 	case bool:
-	// 		println("bool")
-	// 	case string:
-	// 		println("string")
-	// 	default:
-	// 		println("unknown")
-	// 	}
-
-	// 	sum := 0
-	// 	for i := 1; i <= 100; i++ {
-	// 		sum += i
-	// 	}
-	// 	println(sum)
-
-	// 	ex1 := 1
-	// 	for ex1 < 100 {
-	// 		ex1 *= 2
-	// 	}
-	// 	println(ex1)
-
-	// L1:
-	// 	for {
-	// 		if sum == 5050 {
-	// 			break L1
-	// 		}
-	// 	}
-	// 	println("break OK")
-
-	// 	names := []string{"홍길동", "이순신", "강감찬"}
-	// 	for index, name := range names {
-	// 		println(index, name)
-	// 	}
-
-	// 	s := sumi(1, 2, 3, 4, 15, 346, 234, 395)
-	// 	println(s)
-
-	// 	cnt, s2 := sumo(1, 2, 3, 4, 15, 346, 234, 395)
-	// 	println(cnt, s2)
-
-	// 	array()
-
-	//	slice()
-
-	//	mapTest()
-
-	// methodTest()
-
-	errTest()
 }
 
 /****** function ******/
@@ -321,7 +220,7 @@ func methodTest() {
 	x = 1
 	fmt.Println(x)
 
-	x = "TIM"
+	x = "TOM"
 	fmt.Println(x)
 }
 
@@ -338,4 +237,166 @@ func errTest() {
 		log.Fatal(err.Error())
 	}
 	fmt.Println(f.Name())
+}
+
+func deferTest() {
+	openFile("/home/hjyoun/tmp/test")
+	fmt.Println("Done1")
+	openFile("/home/hjyoun/tmp/Invalid.txt")
+	fmt.Println("Done2")
+}
+
+func openFile(fn string) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("OPEN ERROR", r)
+		}
+	}()
+	f, err := os.Open(fn)
+	if err != nil {
+		panic(err)
+	}
+	bytes := make([]byte, 128)
+	f.Read(bytes)
+	fmt.Println(len(bytes))
+
+	defer f.Close()
+}
+
+func goSay(s string) {
+	for i := 0; i < 10; i++ {
+		fmt.Println(s, "***", i)
+		time.Sleep(time.Millisecond * 100)
+	}
+}
+
+func goroutineTest() {
+	goSay("Sync")
+
+	go goSay("Async1")
+	go goSay("Async2")
+	go goSay("Async3")
+
+	time.Sleep(time.Second * 3)
+
+	var wait sync.WaitGroup
+	wait.Add(2)
+
+	go func() {
+		defer wait.Done()
+		fmt.Println("Hello")
+	}()
+
+	go func(msg string) {
+		defer wait.Done()
+		fmt.Println(msg)
+	}("Hi")
+	wait.Wait()
+}
+
+func main() {
+
+	// 	rawLiteral := `아리랑\n아리랑\n아라리요`
+	// 	interLiteral := "아리랑 아리랑\n아라리요"
+
+	// 	say(rawLiteral)
+	// 	say(interLiteral)
+
+	// 	sayHello := "hello"
+	// 	say2(&sayHello)
+	// 	say2(&sayHello)
+
+	// 	say3("this", "is", "a", "book")
+	// 	say3("hi")
+
+	// 	fmt.Printf("%d %d %d %d %d %d %d %d %d %s %s %s %s", a, int(f), i, j, k, c, Apple, Grape, Orange, s, Visa, Master, Amex)
+
+	// 	if a == 1 {
+	// 		fmt.Println("a is 1")
+	// 	} else if a == 2 {
+	// 		fmt.Println("a is 2")
+	// 	} else {
+	// 		fmt.Println("a is not 1 or 2")
+	// 	}
+
+	// 	if val := i * 2; i < k {
+	// 		fmt.Println(val)
+	// 	}
+
+	// 	switch val := 1; val {
+	// 	case 1:
+	// 		fmt.Println("val is 1")
+	// 	case 2:
+	// 		fmt.Println("val is 2")
+	// 	case 3:
+	// 		fmt.Println("val is 3")
+	// 	default:
+	// 		fmt.Println("val is not 123")
+	// 	}
+
+	// 	switch val2 := 0; {
+	// 	case val2 == 0:
+	// 		fmt.Println("val is 0")
+	// 	case val2 == 1:
+	// 		fmt.Println("val is 1")
+	// 	case val2 == 2:
+	// 		fmt.Println("val is 2")
+	// 	}
+
+	// 	var i interface{} //???? what is interface{}
+	// 	switch i.(type) {
+	// 	case int:
+	// 		println("int")
+	// 	case bool:
+	// 		println("bool")
+	// 	case string:
+	// 		println("string")
+	// 	default:
+	// 		println("unknown")
+	// 	}
+
+	// 	sum := 0
+	// 	for i := 1; i <= 100; i++ {
+	// 		sum += i
+	// 	}
+	// 	println(sum)
+
+	// 	ex1 := 1
+	// 	for ex1 < 100 {
+	// 		ex1 *= 2
+	// 	}
+	// 	println(ex1)
+
+	// L1:
+	// 	for {
+	// 		if sum == 5050 {
+	// 			break L1
+	// 		}
+	// 	}
+	// 	println("break OK")
+
+	// 	names := []string{"홍길동", "이순신", "강감찬"}
+	// 	for index, name := range names {
+	// 		println(index, name)
+	// 	}
+
+	// 	s := sumi(1, 2, 3, 4, 15, 346, 234, 395)
+	// 	println(s)
+
+	// 	cnt, s2 := sumo(1, 2, 3, 4, 15, 346, 234, 395)
+	// 	println(cnt, s2)
+
+	// 	array()
+
+	//	slice()
+
+	//	mapTest()
+
+	// methodTest()
+
+	// errTest()
+
+	// deferTest()
+
+	goroutineTest()
 }
