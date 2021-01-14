@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 )
 
 func makeStar(n int) [][]string {
@@ -18,6 +20,7 @@ func makeStar(n int) [][]string {
 			}
 		}
 	}
+
 	return stars
 }
 
@@ -25,7 +28,6 @@ func makeBlank(n int, blankSize int, p [][]string) [][]string {
 	if blankSize == 1 {
 		return p
 	}
-
 	for i := blankSize; i < n; i += blankSize * 3 {
 		for j := blankSize; j < n; j += blankSize * 3 {
 			for x := i; x < i+blankSize; x++ {
@@ -35,22 +37,22 @@ func makeBlank(n int, blankSize int, p [][]string) [][]string {
 			}
 		}
 	}
-
 	return makeBlank(n, blankSize/3, p)
 }
 
 func printStar(n int) {
-	var strStar string
+	writer := bufio.NewWriter(os.Stdout)
+	defer writer.Flush()
+
 	pattern := makeStar(n)
 	pattern = makeBlank(n, n/3, pattern)
 
 	for i := 0; i < n; i++ {
 		for _, i := range pattern[i] {
-			strStar += string(i)
+			writer.WriteString(i)
 		}
-		strStar += "\n"
+		writer.WriteString("\n")
 	}
-	fmt.Print(strStar)
 }
 
 func main() {
