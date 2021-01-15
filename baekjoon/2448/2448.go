@@ -1,74 +1,69 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"os"
+	"strings"
 )
 
 var pattern []string
 
-func makeBlank(k int, n int, star []string) []string {
-	for i :=0;i+3<n;i+=3 {
-		for j:=0;j<n-(i+3);j++ {
-			star[i] += " "
-			star[i+1] += " "
-			star[i+2] += " "
+func makeBlank(kkm int, star []string) []string {
+	for i := 0; i < kkm; i++ {
+		for j := 0; j < kkm; j = j + 3 {
+			star[i] = "   " + star[i] + "   "
 		}
 	}
 
 	return star
 }
 
-func makeStar(k int, n int, star []string) []string {
-
-	if int(math.Pow(2, float64(k))) > n/3 {
+func makeStar(k int, l int, n int, star []string, pattern []string) []string {
+	if (l+1)*3 > n {
 		return star
 	}
 
-	if k==0 {
-		pattern[0]="  *   "
-		pattern[1]=" * *  "
-		pattern[2]="***** "
-		star[0]+=pattern[0]
-		star[1]+=pattern[1]
-		star[2]+=pattern[2]
-		return makeStar(k+1, n, star)
-	}
-	for count := 0; count <= k; count++ {
-
-		for i := 0; i < 3; i++ {
-			switch i {
-			case 0:
-				star[k*3+i] += pattern[0]
-			case 1:
-				star[k*3+i] += pattern[1]
-			case 2:
-				star[k*3+i] += pattern[2]
-			}
-		}
+	if k == 0 {
+		star[0] = pattern[0]
+		star[1] = pattern[1]
+		star[2] = pattern[2]
+		return makeStar(k+1, 1, n, star, pattern)
 	}
 
+	kk := int(math.Pow(2, float64(k))) * 3
+	kkm := int(math.Pow(2, float64(k-1))) * 3
 
-	return makeStar(k+1, n, star)
+	star = makeBlank(kkm, star)
+
+	j := 0
+	for i := kkm; i < kk; i++ {
+		star[i] = pattern[j] + pattern[j]
+		j++
+	}
+	copy(pattern, star)
+	return makeStar(k+1, l*2+1, n, star, pattern)
 }
 
-func printStar(k int, n int) {
-	var stars string
+func printStar(k int, l int, n int) {
 	var star []string
-	pattern = make([]string,n)
-	star = make([]string,n)
-	star = makeBlank(k,n,star)
-	star = makeStar(k, n, star)
-	for _,line := range star{
-		stars+=line
-		stars+="\n"
-	}
-	fmt.Print(stars)
+	pattern = make([]string, n)
+	star = make([]string, n)
+	writer := bufio.NewWriter(os.Stdout)
+	defer writer.Flush()
+
+	pattern[0] = "  *   "
+	pattern[1] = " * *  "
+	pattern[2] = "***** "
+
+	star = makeStar(k, l, n, star, pattern)
+	stars := strings.Join(star, "\n")
+	writer.WriteString(stars)
 }
 
 func main() {
-	N := []int{3, 6, 12, 24, 48, 96}
-	var k int
-	k = 2
-	printStar(0, N[k])
+	var n int
+	fmt.Scan(&n)
+	printStar(0, 0, n)
 }
